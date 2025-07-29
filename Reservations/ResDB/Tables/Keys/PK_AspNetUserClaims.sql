@@ -1,0 +1,1 @@
+ALTER TABLE [dbo].[AspNetUserClaims] ADD CONSTRAINT [PK_AspNetUserClaims] PRIMARY KEY ([Id]);

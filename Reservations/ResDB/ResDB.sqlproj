@@ -63,14 +63,27 @@
     <Folder Include="Tables\Keys" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Tables\Users.sql" />
     <Build Include="Tables\Configuration.sql" />
-    <Build Include="Tables\Keys\PK_Users.sql" />
     <Build Include="Tables\Keys\PK_Configuration.sql" />
     <Build Include="Tables\Indexes\IX_Configuration_Name.sql" />
-    <Build Include="Tables\Indexes\IX_Users_Username.sql" />
-    <Build Include="Tables\Roles.sql" />
-    <Build Include="Tables\Keys\PK_Roles.sql" />
-    <Build Include="Tables\Keys\FK_Users_Roles.sql" />
+    <Build Include="Tables\AspNetUsers.sql" />
+    <Build Include="Tables\AspNetRoles.sql" />
+    <Build Include="Tables\AspNetUserRoles.sql" />
+    <Build Include="Tables\AspNetUserClaims.sql" />
+    <Build Include="Tables\AspNetRoleClaims.sql" />
+    <Build Include="Tables\AspNetUserLogins.sql" />
+    <Build Include="Tables\AspNetUserTokens.sql" />
+    <Build Include="Tables\Keys\PK_AspNetUsers.sql" />
+    <Build Include="Tables\Keys\PK_AspNetRoles.sql" />
+    <Build Include="Tables\Keys\PK_AspNetUserRoles.sql" />
+    <Build Include="Tables\Keys\PK_AspNetUserClaims.sql" />
+    <Build Include="Tables\Keys\PK_AspNetRoleClaims.sql" />
+    <Build Include="Tables\Keys\PK_AspNetUserLogins.sql" />
+    <Build Include="Tables\Keys\PK_AspNetUserTokens.sql" />
+    <Build Include="Tables\Keys\FK_AspNetRoleClaims_AspNetRoles.sql" />
+    <Build Include="Tables\Keys\FK_AspNetUserClaims_AspNetUsers.sql" />
+    <Build Include="Tables\Keys\FK_AspNetUserLogins_AspNetUsers.sql" />
+    <Build Include="Tables\Keys\FK_AspNetUserRoles_AspNetUsers.sql" />
+    <Build Include="Tables\Keys\FK_AspNetUserTokens_AspNetUsers.sql" />
   </ItemGroup>
 </Project>
