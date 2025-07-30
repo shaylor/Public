@@ -1,5 +1,7 @@
 ﻿@page "/configuration"
 
+@inject ResWeb.Services.Configuration ConfigurationService
+
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize(Roles = "Admin")]
@@ -7,9 +9,15 @@
 <PageTitle>Configuration</PageTitle>
 
 <AuthorizeView>
-    Coming soon!
+    <!--Display all loaded config properties and the value.-->
+    @foreach (var property in typeof(ResWeb.Services.Configuration).GetProperties())
+    {
+        <ul>
+            @property.Name:
+            @property.GetValue(ConfigurationService, null)
+        </ul>
+    }
 </AuthorizeView>
 
 @code {
-    // TODO: Display config items here.
 }
