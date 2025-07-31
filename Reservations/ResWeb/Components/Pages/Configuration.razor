@@ -17,7 +17,7 @@
         <InputText @bind-Value="configProperties[propertyName]"
                    class="form-control"
                    @oninput="HasChanged" />
-        @if (property.GetType() == typeof(TimeSpan)) // Additional text to indicate the format of TimeSpan properties.
+        @if (property.PropertyType == typeof(TimeSpan)) // Additional text to indicate the format of TimeSpan properties.
         {
             <span class="text-muted">Format: hh:mm:ss</span>
         }

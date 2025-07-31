@@ -7,7 +7,8 @@ namespace ResWeb.Models
     {
         [Key]
         public Guid Id { get; set; }
+        [Required]
         public string Name { get; set; }
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }
