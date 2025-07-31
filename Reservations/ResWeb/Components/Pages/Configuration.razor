@@ -8,16 +8,77 @@
 
 <PageTitle>Configuration</PageTitle>
 
-<AuthorizeView>
-    <!--Display all loaded config properties and the value.-->
-    @foreach (var property in typeof(ResWeb.Services.Configuration).GetProperties())
-    {
-        <ul>
-            @property.Name:
-            @property.GetValue(ConfigurationService, null)
-        </ul>
-    }
-</AuthorizeView>
+<!--Display all loaded config properties and the value.-->
+@foreach (var property in typeof(ResWeb.Services.Configuration).GetProperties())
+{
+    var propertyName = property.Name; // Bind property.Name to a local var to prevent PropertyExpression rendering in binding.
+   <div>
+        <label>@propertyName:</label>
+        <InputText @bind-Value="configProperties[propertyName]"
+                   class="form-control"
+                   @oninput="HasChanged" />
+        @if (property.GetType() == typeof(TimeSpan)) // Additional text to indicate the format of TimeSpan properties.
+        {
+            <span class="text-muted">Format: hh:mm:ss</span>
+        }
+    </div>
+}
+<button class="btn btn-primary" @onclick="Save" disabled="@(!HasChanges)">Save</button>
+
 
 @code {
+    bool HasChanges = false;
+
+    // Blazor binds cannot bind directly to the properties of the ConfigurationService. Use Dictionary to bind to the properties dynamically.
+    Dictionary<string, string> configProperties = new Dictionary<string, string>();
+
+    protected override void OnInitialized()
+    {
+        // Initialize the configuration properties dictionary with the values from the ConfigurationService.
+        foreach (var property in typeof(ResWeb.Services.Configuration).GetProperties())
+        {
+            var value = property.GetValue(ConfigurationService)?.ToString() ?? "Not set.";
+            configProperties[property.Name] = value;
+        }
+    }
+
+    public async Task HasChanged()
+    {
+        // Too resource heavy to compare all properties on every change. Assume true if any input changes.
+        HasChanges = true;
+        StateHasChanged();
+    }
+
+    public async Task Save()
+    {
+        // Iterate through the properties and update the ConfigurationService.
+        foreach (var property in typeof(ResWeb.Services.Configuration).GetProperties())
+        {
+            if (configProperties.TryGetValue(property.Name, out var value))
+            {
+                // Convert the string value back to the appropriate type.
+                if (property.PropertyType == typeof(TimeSpan))
+                {
+                    if (TimeSpan.TryParse(value, out var timeSpanValue))
+                    {
+                        property.SetValue(ConfigurationService, timeSpanValue);
+                    }
+                    else
+                    {
+                        // Optionally, you could show a message to the user indicating the format is incorrect.
+                        // For now, we will just log it.
+                        Console.WriteLine($"Invalid TimeSpan format for property {property.Name}: {value}");
+                    }
+                }
+                else
+                {
+                    property.SetValue(ConfigurationService, value);
+                }
+            }
+        }
+
+        // Save the updated configuration.
+        await ConfigurationService.SaveAsync();
+        HasChanges = false;
+    }
 }
