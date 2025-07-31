@@ -4,14 +4,14 @@ Admin can sign in. Has basic dashboard that displays existing orders, allows the
 User can sign in or proceed as guest. Has the ability to view their reservations or create new ones.
 Reminder service will send email when reservation is within X(configurable) timespan.
 
-Create basic login functionality.
-Add two factor auth.
-Add lockout rules based on configuration table rules.
-Add role based auth for functions.
-Add admin ability to create activities.
-Add admin ability to create schedules.
-Add admin ability to assign activities to a schedule.
-Add user ability to register new accounts.
+TODO:
+Create Guest user. Will be used to bind orders to users.
+Add Admin ability to modify configuration. ConfigItem for reminder timespan.
+Add Admin ability to adjust user roles.
+Add reservationist ability to create schedules.
+Add reservationist ability to create activities.
+Add reservatistist ability to assign activities to a schedule.
+Add user ability to register new accounts. -- new accounts need to default to customer.
 Add user ability to create a new reservation. -- Make sure to denote with comments how you would attach to a payment processor.
 
 Add timer trigger to check for reservations starting soon - Should use configuration table settings for timeframe.

@@ -85,5 +85,6 @@
     <Build Include="Tables\Keys\FK_AspNetUserLogins_AspNetUsers.sql" />
     <Build Include="Tables\Keys\FK_AspNetUserRoles_AspNetUsers.sql" />
     <Build Include="Tables\Keys\FK_AspNetUserTokens_AspNetUsers.sql" />
+    <Build Include="Programmability\Stored Procedures\uspGetAllConfiguration.sql" />
   </ItemGroup>
 </Project>

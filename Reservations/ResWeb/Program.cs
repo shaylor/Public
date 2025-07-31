@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ResWeb.Components;
 using ResWeb.Components.Account;
 using ResWeb.Data;
+using ResWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,19 +27,29 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* ... 
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+// Configuration service.
+builder.Services.AddSingleton<Configuration>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Load Configuration settings.
+using (var scope = app.Services.CreateScope())
 {
-    app.UseMigrationsEndPoint();
+    var configService = scope.ServiceProvider.GetRequiredService<Configuration>();
+    await configService.LoadAsync();
 }
-else
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseMigrationsEndPoint();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        app.UseHsts();
+    }
 
 app.UseHttpsRedirection();
 
