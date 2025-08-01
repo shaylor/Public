@@ -1,0 +1,118 @@
+﻿@page "/users"
+
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Users</PageTitle>
+
+<h3>Users</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User Name</th>
+            <th>Role</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userRole in userRoles)
+        {
+            <tr>
+                <td>@userRole.User.UserName</td>
+                <td>
+                    <select class="form-select" @bind="@userRole.RoleId">
+                        @if (allRoles.Count != 1)
+                        {
+                            <option value="">Select Role</option>
+                        }
+                        @foreach (var role in allRoles)
+                        {
+                            <option value="@role.Id">@role.Name</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button type="button" class="btn btn-primary" @onclick=OnSubmit>Save</button>
+
+@code {
+    List<Models.UserRole> userRoles = new();
+    List<IdentityRole> allRoles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        userRoles.Clear();
+        allRoles.Clear();
+
+        try
+        {
+            allRoles = RoleManager.Roles.ToList(); // Load all roles from the RoleManager.
+
+            // Load all users into a list. EF cannot load user details while the loop holds open the DBContext, so this must be done.
+            var allUsers = await UserManager.Users.ToListAsync(); // Load all users from the UserManager.
+            
+            // Load all the users and their roles into the List.
+            foreach (var user in allUsers)
+            {
+                var roles = await UserManager.GetRolesAsync(user);
+                var roleName = roles.FirstOrDefault(); // Should only be one role per user in our configuration.
+                if (roleName != null)
+                {
+                    var role = allRoles.Where(r => r.Name == roleName).FirstOrDefault();
+                    if (role != null)
+                    {
+                        userRoles.Add(new Models.UserRole
+                        {
+                            User = user,
+                            RoleId = role.Id
+                        });
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // You could replace this with more advanced logging. Unnecessary for our use case.
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public async Task OnSubmit()
+    {
+        foreach (var userRole in userRoles)
+        {
+            var user = userRole.User;
+            var role = allRoles.FirstOrDefault(r => r.Id == userRole.RoleId);
+
+            // Check if user role has changed.
+            var currentRoles = await UserManager.GetRolesAsync(user);
+            var currentRole = currentRoles.FirstOrDefault();
+            if (currentRole != null && currentRole == role?.Name)
+            {
+                continue; // No change in role, skip to next user.
+            }
+
+            // Remove the user from all roles they are currently assigned first to ensure they are only in the selected role.
+            await UserManager.RemoveFromRolesAsync(user, await UserManager.GetRolesAsync(user));
+
+            if (role != null && !string.IsNullOrWhiteSpace(role.Name))
+            {
+                // Ensure the user is in the role.
+                if (!await UserManager.IsInRoleAsync(user, role.Name))
+                {
+                    await UserManager.AddToRoleAsync(user, role.Name);
+                }
+            }
+        }
+        
+        // In a more advanced project, you would show the user a success message or redirect the page here.
+        Console.WriteLine("User roles updated successfully.");
+    }
+}
