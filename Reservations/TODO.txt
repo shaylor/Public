@@ -6,8 +6,6 @@ Reminder service will send email when reservation is within X(configurable) time
 
 TODO:
 Create Guest user. Will be used to bind orders to users.
-Add Admin ability to modify configuration. ConfigItem for reminder timespan.
-Add Admin ability to adjust user roles.
 Add reservationist ability to create schedules.
 Add reservationist ability to create activities.
 Add reservatistist ability to assign activities to a schedule.
