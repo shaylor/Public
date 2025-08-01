@@ -57,10 +57,16 @@
 
             // Load all users into a list. EF cannot load user details while the loop holds open the DBContext, so this must be done.
             var allUsers = await UserManager.Users.ToListAsync(); // Load all users from the UserManager.
-            
+
             // Load all the users and their roles into the List.
             foreach (var user in allUsers)
             {
+                var userRole = new Models.UserRole
+                {
+                    User = user,
+                    RoleId = string.Empty // Default to no role selected.
+                };
+
                 var roles = await UserManager.GetRolesAsync(user);
                 var roleName = roles.FirstOrDefault(); // Should only be one role per user in our configuration.
                 if (roleName != null)
@@ -68,13 +74,11 @@
                     var role = allRoles.Where(r => r.Name == roleName).FirstOrDefault();
                     if (role != null)
                     {
-                        userRoles.Add(new Models.UserRole
-                        {
-                            User = user,
-                            RoleId = role.Id
-                        });
+                        userRole.RoleId = role.Id;
                     }
                 }
+
+                userRoles.Add(userRole);
             }
         }
         catch (Exception ex)
@@ -100,18 +104,14 @@
             }
 
             // Remove the user from all roles they are currently assigned first to ensure they are only in the selected role.
-            await UserManager.RemoveFromRolesAsync(user, await UserManager.GetRolesAsync(user));
+            await UserManager.RemoveFromRolesAsync(user, currentRoles);
 
             if (role != null && !string.IsNullOrWhiteSpace(role.Name))
             {
-                // Ensure the user is in the role.
-                if (!await UserManager.IsInRoleAsync(user, role.Name))
-                {
-                    await UserManager.AddToRoleAsync(user, role.Name);
-                }
+                await UserManager.AddToRoleAsync(user, role.Name);
             }
         }
-        
+
         // In a more advanced project, you would show the user a success message or redirect the page here.
         Console.WriteLine("User roles updated successfully.");
     }
