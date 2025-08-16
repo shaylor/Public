@@ -1,0 +1,2 @@
+ALTER TABLE [dbo].[Schedules]
+	ADD CONSTRAINT [PK_Schedules] PRIMARY KEY CLUSTERED ([Id] ASC);

@@ -86,5 +86,11 @@
     <Build Include="Tables\Keys\FK_AspNetUserRoles_AspNetUsers.sql" />
     <Build Include="Tables\Keys\FK_AspNetUserTokens_AspNetUsers.sql" />
     <Build Include="Programmability\Stored Procedures\uspGetAllConfiguration.sql" />
+    <Build Include="Tables\Schedules.sql" />
+    <Build Include="Tables\ScheduleDateTimes.sql" />
+    <Build Include="Tables\Keys\PK_Schedules.sql" />
+    <Build Include="Tables\Keys\PK_ScheduleDateTimes.sql" />
+    <Build Include="Tables\Keys\FK_Schedules_ScheduleDateTimes.sql" />
+    <Build Include="Tables\Indexes\IX_ScheduleDateTimes_ScheduleId.sql" />
   </ItemGroup>
 </Project>

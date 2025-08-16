@@ -1,0 +1,128 @@
+﻿<div>
+    <label>Name:</label>
+    <InputText @bind-value="Schedule.Name" disabled="@IsEdit" />
+</div>
+
+<div>
+    <label>Description:</label>
+    <InputText @bind-value="Schedule.Description"></InputText>
+</div>
+
+<table>
+    <tr>
+        <th>Date Time</th>
+        <th>Active</th>
+        <th>Max Participants</th>
+    </tr>
+    @foreach (var scheduleDateTime in Schedule.DateTimes)
+    {
+        <tr>
+            <td>
+                @scheduleDateTime.CronExpression
+            </td>
+            <td>
+                <InputCheckbox @bind-Value="scheduleDateTime.IsActive"></InputCheckbox>
+            </td>
+            <td>
+                <InputNumber @bind-Value="scheduleDateTime.MaxParticipants"></InputNumber>
+            </td>
+        </tr>
+    }
+</table>
+
+<h3>Add Dates</h3>
+<div>
+    <table>
+        <tr>
+            <th>Minute</th>
+            <th>Hour</th>
+            <th>Day</th>
+            <th>Month</th>
+            <th>Year</th>
+        </tr>
+        <tr>
+            <td>
+                <InputSelect @bind-Value="addDateTimeMinute" class="col-sm-12">
+                    <option value="*">Every</option>
+                    @for (int i = 0; i < 60; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </InputSelect>
+            </td>
+            <td>
+                <InputSelect @bind-Value="addDateTimeHour" class="col-sm-12">
+                    <option value="*">Every</option>
+                    @for (int i = 0; i < 24; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </InputSelect>
+            </td>
+            <td>
+                <InputSelect @bind-Value="addDateTimeDay" class="col-sm-12">
+                    <option value="*">Every</option>
+                    @for (int i = 1; i <= 31; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </InputSelect>
+            </td>
+            <td>
+                <InputSelect @bind-Value="addDateTimeMonth" class="col-sm-12">
+                    <option value="*">Every</option>
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </InputSelect>
+            </td>
+            <td>
+                <InputSelect @bind-Value="addDateTimeYear" class="col-sm-12">
+                    <option value="*">Every</option>
+                    @for (int i = DateTime.Now.Year; i <= DateTime.Now.Year + 5; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </InputSelect>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<button class="btn btn-secondary" @onclick="AddDateTime">Add Date/Time</button>
+
+@code {
+    [Parameter] public Models.Schedule Schedule { get; set; }
+    [Parameter] public bool IsEdit { get; set; }
+
+    // This currently only supports day of month. Could be expanded to allow full cron syntax, like every Friday or ranges.
+    public string addDateTimeMinute = "*";
+    public string addDateTimeHour = "*";
+    public string addDateTimeDay = "*";
+    public string addDateTimeMonth = "*";
+    public string addDateTimeYear = "*";
+
+    public void AddDateTime()
+    {
+        var scheduleDateTime = new Models.ScheduleDateTime();
+
+        // Validate that selected date and month combo is valid.
+        if (addDateTimeDay != "*" && addDateTimeMonth != "*")
+        {
+            int day = int.Parse(addDateTimeDay);
+            int month = int.Parse(addDateTimeMonth);
+            int year = addDateTimeYear == "*" ? DateTime.Now.Year : int.Parse(addDateTimeYear);
+            if (day > DateTime.DaysInMonth(year, month))
+            {
+                // Invalid date selection.
+                return;
+            }
+        }
+
+        scheduleDateTime.CronExpression = $"{addDateTimeMinute} {addDateTimeHour} {addDateTimeDay} {addDateTimeMonth} {addDateTimeYear}";
+        Schedule.DateTimes.Add(scheduleDateTime);
+
+        StateHasChanged();
+    }
+}

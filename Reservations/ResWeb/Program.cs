@@ -27,8 +27,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* ... 
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-// Configuration service.
+// Custom services.
 builder.Services.AddSingleton<Configuration>();
+builder.Services.AddTransient<Schedules>();
 
 var app = builder.Build();
 
