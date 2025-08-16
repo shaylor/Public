@@ -1,0 +1,126 @@
+﻿@page "/schedules"
+
+@inject Services.Schedules SchedulesService
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin,Reservationist")]
+
+<h3>Schedules</h3>
+
+@if (showModal)
+{
+    <Modal @ref=modal
+           Title="@modalTitle"
+           OnClose="CloseModal"
+           OnSubmit="SaveSchedule"
+           ChildContent="@modalContent" />
+}
+
+<button type="button" @onclick="() => ShowModal()" class="btn btn-primary">Add</button>
+<div>
+    <table class="table">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Expression Count</th>
+            <th>Delete</th>
+            <th>Edit</th>
+        </tr>
+        @foreach (var schedule in schedules)
+        {
+            <tr>
+                <td>@schedule.Name</td>
+                <td>@schedule.Description</td>
+                <td>@schedule.DateTimes.Count()</td>
+                <td><button class="btn btn-danger" @onclick="() => DeleteSchedule(schedule.Id)">Delete</button></td>
+                <td><button class="btn btn-dark" @onclick="() =>ShowModal(schedule)">Edit</button></td>
+            </tr>
+        }
+
+    </table>
+</div>
+
+@code {
+    bool showModal = false;
+    string modalTitle = string.Empty;
+    Modal modal;
+    RenderFragment modalContent;
+    Models.Schedule editSchedule = null; // Placeholder for data passed between modal and parent.
+
+    List<Models.Schedule> schedules = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadSchedules();
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions, e.g., log the error or show a message to the user
+            Console.WriteLine($"Error fetching schedules: {ex.Message}");
+        }
+    }
+
+    public async Task LoadSchedules(CancellationToken cancellationToken = default)
+    {
+        schedules = await SchedulesService.GetAllSchedulesAsync();
+    }
+
+    public void ShowModal(Models.Schedule? schedule = null)
+    {
+        var isAdd = true;
+        if (schedule == null) // Adding a new schedule.
+        {
+            modalTitle = "Add Schedule";
+
+            // Initialize a new schedule model.
+            editSchedule = new Models.Schedule
+            {
+                DateTimes = new List<Models.ScheduleDateTime>()
+            };
+        }
+        else // Editing an existing schedule.
+        {
+            isAdd = false;
+            modalTitle = "Edit Schedule";
+            editSchedule = schedule; // Assign the reference for use with the save callback method.
+        }
+
+        modalContent = builder =>
+        {
+            builder.OpenComponent<EditSchedule>(0);
+            builder.AddAttribute(1, "Schedule", editSchedule); // Pass model as parameter.
+            builder.AddAttribute(2, "IsEdit", !isAdd); // Pass whether it's edit mode.
+            builder.CloseComponent();
+        };
+
+        showModal = true;
+    }
+
+    public void CloseModal() => showModal = false;
+
+    public async Task SaveSchedule()
+    {
+        if (editSchedule != null && !string.IsNullOrWhiteSpace(editSchedule.Name) && !editSchedule.DateTimes.Any())
+        {
+            return; // Invalid schedule, do not save. In a full implementation, show a validation message.
+        }
+        else
+        {
+            await SchedulesService.UpdateSchedule(editSchedule);
+        }
+
+        await LoadSchedules();
+        StateHasChanged();
+        CloseModal();
+    }
+
+    public async Task DeleteSchedule(Guid scheduleId)
+    {
+        await SchedulesService.DeleteSchedule(scheduleId);
+        await LoadSchedules();
+        StateHasChanged();
+    }
+}
