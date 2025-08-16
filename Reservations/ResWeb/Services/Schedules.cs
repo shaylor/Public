@@ -55,7 +55,7 @@ namespace ResWeb.Services
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            var schedule = await dbContext.Schedules.Include(s=>s.DateTimes).FirstOrDefaultAsync().ConfigureAwait(false);
+            var schedule = await dbContext.Schedules.Include(s=>s.DateTimes).FirstOrDefaultAsync(s => s.Id == scheduleId).ConfigureAwait(false);
             if (schedule != null)
             {
                 await DeleteSchedule(schedule, dbContext, cancellationToken).ConfigureAwait(false);
@@ -71,7 +71,7 @@ namespace ResWeb.Services
             }
 
             dbContext.Schedules.Remove(schedule);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }

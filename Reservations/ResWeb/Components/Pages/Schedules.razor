@@ -34,7 +34,7 @@
                 <td>@schedule.Description</td>
                 <td>@schedule.DateTimes.Count()</td>
                 <td><button class="btn btn-danger" @onclick="() => DeleteSchedule(schedule.Id)">Delete</button></td>
-                <td><button class="btn btn-dark" @onclick="() =>ShowModal(schedule)">Edit</button></td>
+                <td><button class="btn btn-dark" @onclick="() => ShowModal(schedule)">Edit</button></td>
             </tr>
         }
 
@@ -103,7 +103,7 @@
 
     public async Task SaveSchedule()
     {
-        if (editSchedule != null && !string.IsNullOrWhiteSpace(editSchedule.Name) && !editSchedule.DateTimes.Any())
+        if (editSchedule == null || string.IsNullOrWhiteSpace(editSchedule.Name) || !editSchedule.DateTimes.Any())
         {
             return; // Invalid schedule, do not save. In a full implementation, show a validation message.
         }
@@ -119,6 +119,11 @@
 
     public async Task DeleteSchedule(Guid scheduleId)
     {
+        if (scheduleId == Guid.Empty)
+        {
+            return; // Invalid ID.
+        }
+
         await SchedulesService.DeleteSchedule(scheduleId);
         await LoadSchedules();
         StateHasChanged();
